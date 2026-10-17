@@ -53,6 +53,13 @@ nav.tabs button.on{color:var(--g);font-weight:650}
 .btn.p{background:var(--g);border-color:var(--g);color:#fff;font-weight:600}
 .btn.d{color:var(--r)}
 .btn:disabled{opacity:.55}
+.tblwrap{overflow-x:auto;background:#fff;border-radius:12px;box-shadow:var(--sh)}
+table.dt{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
+table.dt th{background:var(--gl);color:var(--gd);text-align:left;padding:10px 12px;font-size:12.5px;white-space:nowrap}
+table.dt td{padding:9px 12px;border-top:1px solid var(--bd);vertical-align:middle}
+table.dt tr:hover td{background:#f8fbf9}
+table.dt td.ac{white-space:nowrap;text-align:right}
+table.dt .btn{padding:5px 10px;font-size:12.5px}
 .empty{text-align:center;color:var(--mu);padding:40px 10px}
 h3.sec{margin:18px 2px 8px;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mu)}
 label.f{display:block;margin-bottom:11px;font-size:12.5px;color:var(--mu)}
@@ -369,15 +376,18 @@ function cacheNow() { LS.set('sppd_cache', { settings: S.settings, pegawai: S.pe
 function renderPegawai() {
   const q = $('#qp').value.trim().toLowerCase();
   const rows = S.pegawai.filter(p => !q || [p.nama, p.jabatan, p.nip].join(' ').toLowerCase().includes(q));
-  $('#listPegawai').innerHTML = rows.length ? rows.map(p => `
-    <div class="card item" data-id="${esc(p.id)}">
-      <div class="row"><div><div class="t1">${esc(p.nama)}</div><div class="t2">${esc(p.jabatan || '-')}${p.nip ? ' · NIP ' + esc(p.nip) : ''}</div></div></div>
-      <div class="acts"><button class="btn" data-a="edit">Ubah</button><button class="btn d" data-a="del">Hapus</button></div></div>`).join('')
+  $('#listPegawai').innerHTML = rows.length ? `
+    <div class="tblwrap"><table class="dt">
+      <thead><tr><th>No</th><th>Nama</th><th>NIP</th><th>Jabatan</th><th>Pangkat/Gol.</th><th>Aksi</th></tr></thead>
+      <tbody>${rows.map((p, i) => `<tr data-id="${esc(p.id)}">
+        <td>${i + 1}</td><td><b>${esc(p.nama)}</b></td><td>${esc(p.nip || '-')}</td><td>${esc(p.jabatan || '-')}</td><td>${esc(p.pangkat || '-')}</td>
+        <td class="ac"><button class="btn" data-a="edit">Ubah</button> <button class="btn d" data-a="del">Hapus</button></td></tr>`).join('')}</tbody>
+    </table></div>`
     : `<div class="empty">${S.pegawai.length ? 'Tidak ada hasil.' : 'Belum ada data pegawai.<br>Tambahkan agar bisa dipilih saat membuat SPPD.'}</div>`;
 }
 $('#listPegawai').onclick = async e => {
   const b = e.target.closest('[data-a]'); if (!b) return;
-  const p = S.pegawai.find(x => x.id === b.closest('.item').dataset.id); if (!p) return;
+  const p = S.pegawai.find(x => x.id === b.closest('tr').dataset.id); if (!p) return;
   if (b.dataset.a === 'edit') openPegawai(p);
   if (b.dataset.a === 'del') {
     if (!confirm(`Hapus pegawai ${p.nama}?`)) return;
@@ -565,7 +575,7 @@ function buildSheets(s, withSig) {
       <p>Memberikan tugas kepada:</p>
       ${kv('Nama', esc(s.nama))}${kv('Asal Madrasah', esc(s.asalMadrasah || st.nama_madrasah))}${kv('Jabatan', esc(dash(s.jabatan)))}
       <div class="gap"></div>
-      <p class="just">Untuk mengikuti kegiatan <b>“${esc(s.kegiatan || s.maksud)}”</b>.<br>Yang akan dilaksanakan pada:</p>
+      <p class="just">Untuk mengikuti kegiatan <b>“${esc(s.kegiatan || s.maksud)}”</b>. Yang akan dilaksanakan pada:</p>
       ${kv('Hari, Tanggal', esc(hariTgl))}${kv('Pukul', esc(s.pukul))}${kv('Tempat', esc(s.tempatTujuan))}
       <div class="gap"></div><div class="gap"></div>
       <p class="just">Demikian surat tugas ini kami buat untuk dilaksanakan dengan penuh tanggung jawab.<br>Atas perhatiannya kami sampaikan terima kasih.</p>
