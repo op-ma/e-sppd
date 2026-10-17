@@ -231,7 +231,7 @@ const LS = {
 /* =====================================================================
  *  STATE + API
  * ===================================================================== */
-const S = { settings: {}, pegawai: [], sppd: [], aset: { kop: '', stempel: '', ttd: '' }, token: null, tab: 'sppd', online: true };
+const S = { settings: {}, pegawai: [], sppd: [], aset: { kop: '', stempel: '', ttd: '', gabungan: '' }, token: null, tab: 'sppd', online: true };
 
 function apiUrl() { return LS.get('sppd_api') || API_URL_DEFAULT; }
 
@@ -521,14 +521,20 @@ function openForm(s = null, isDup = false) {
  *  PRATINJAU & CETAK  (3 halaman A4: Surat Tugas · SPPD · Keterangan)
  * ===================================================================== */
 function sigBox(withSig) {
-  const st = S.settings, A = S.aset;
-  const ttdH = +st.ttd_tinggi_mm || 22, sz = +st.stempel_ukuran_mm || 30;
-  const gx = +st.stempel_geser_x_mm || 0, gy = +st.stempel_geser_y_mm || 0;
-  const H = Math.max(ttdH + 4, sz * .85);
-  let inner = '';
-  if (withSig && A.stempel) inner += `<img class="stp" src="${A.stempel}" style="width:${sz}mm;left:calc(50% + ${gx}mm);top:calc(50% + ${gy}mm)">`;
-  if (withSig && A.ttd) inner += `<img class="ttd" src="${A.ttd}" style="height:${ttdH}mm;left:50%;top:50%">`;
-  return `<div class="sigbox" style="height:${H}mm">${inner}</div>`;
+  const st = S.settings, A = S.aset, n = (k, d) => (st[k] === undefined || st[k] === '' || isNaN(+st[k])) ? d : +st[k];
+  const img = (src, cls, h, x, y, w) => `<img ${cls ? `class="${cls}"` : ''} src="${src}" style="${w ? `width:${w}mm` : `height:${h}mm`};left:${x}mm;top:calc(50% + ${y}mm)">`;
+  let inner = '', H;
+  if (withSig && A.gabungan) {                       // satu gambar TTD + stempel
+    H = n('gab_h_mm', 36);
+    inner = img(A.gabungan, '', H, n('gab_x_mm', 23), n('gab_y_mm', 0));
+  } else {
+    const th = n('ttd_h_mm', 30), sd = n('stp_d_mm', 26);
+    H = Math.max(th, sd);
+    if (withSig && A.stempel) inner += img(A.stempel, 'stp', 0, n('stp_x_mm', -3), n('stp_y_mm', 1), sd);
+    if (withSig && A.ttd) inner += img(A.ttd, 'ttd', th, n('ttd_x_mm', 38), n('ttd_y_mm', 0));
+    if (!inner) H = Math.max(H, 24);
+  }
+  return `<div class="sigbox" style="height:${H}mm;margin-top:-3mm">${inner}</div>`;
 }
 function kopHtml() {
   return `<div class="kop">${S.aset.kop ? `<img src="${S.aset.kop}" alt="">` : `<div class="ph">Kop surat belum diunggah (Pengaturan → Kop Surat)</div>`}</div>`;
@@ -662,6 +668,7 @@ function closePreview() { $('#preview').classList.add('hide'); $('#preview').inn
 const ASET_INFO = {
   kop:     { t: 'Kop Surat',      d: 'Gambar kop selebar halaman (disarankan rasio ±2,5 : 0,6). Format PNG/JPG.', bg: false },
   stempel: { t: 'Stempel',        d: 'PNG latar transparan paling bagus. Foto/scan akan dihapus latar putihnya otomatis.', bg: true },
+  gabungan:{ t: 'TTD + Stempel (gabungan)', d: 'Satu gambar berisi tanda tangan yang sudah menyatu dengan stempel. Jika diunggah, dipakai menggantikan TTD dan stempel terpisah. Gunakan gambar bersih tanpa garis tabel.', bg: true },
   ttd:     { t: 'Tanda Tangan',   d: 'Tanda tangan Kepala Madrasah. Foto/scan akan dihapus latar putihnya otomatis.', bg: true }
 };
 
@@ -670,20 +677,22 @@ function renderSettings() {
   const I = (k, l, extra = '') => `<label class="f">${l}<input id="s_${k}" value="${v(k)}" ${extra}></label>`;
   $('#v-set').innerHTML = `
     <h3 class="sec">Kop, stempel &amp; tanda tangan</h3>
-    ${['kop', 'stempel', 'ttd'].map(k => `
+    ${['kop', 'stempel', 'ttd', 'gabungan'].map(k => `
       <div class="card"><div class="aset">
         <div class="pv">${S.aset[k] ? `<img src="${S.aset[k]}">` : '<span>Belum ada</span>'}</div>
         <div style="flex:1"><div class="tt">${ASET_INFO[k].t}</div><div class="ds">${ASET_INFO[k].d}</div>
           <div class="acts"><button class="btn p" data-up="${k}">Unggah</button>${S.aset[k] ? `<button class="btn d" data-rm="${k}">Hapus</button>` : ''}</div></div>
       </div></div>`).join('')}
     <input type="file" id="fileIn" accept="image/png,image/jpeg,image/webp" class="hide">
-    <div class="g2 keep">
-      <label class="f">Tinggi TTD (mm)<input id="s_ttd_tinggi_mm" type="number" step="1" value="${v('ttd_tinggi_mm')}"></label>
-      <label class="f">Diameter stempel (mm)<input id="s_stempel_ukuran_mm" type="number" step="1" value="${v('stempel_ukuran_mm')}"></label>
-      <label class="f">Geser stempel ← → (mm)<input id="s_stempel_geser_x_mm" type="number" step="1" value="${v('stempel_geser_x_mm')}"></label>
-      <label class="f">Geser stempel ↑ ↓ (mm)<input id="s_stempel_geser_y_mm" type="number" step="1" value="${v('stempel_geser_y_mm')}"></label>
-    </div>
-    <div class="hint">Atur posisi stempel terhadap tanda tangan, lalu simpan dan cek lewat “Pratinjau contoh”.</div>
+    <h3 class="sec">Ukuran &amp; posisi</h3>
+    <div class="hint" style="margin-top:0">Posisi X = jarak titik tengah gambar dari sisi kiri nama pejabat (mm, boleh minus). Posisi Y = geser naik (−) / turun (+). Simpan, lalu cek lewat “Pratinjau contoh”.</div>
+    ${[['ttd','Tanda tangan','Tinggi'],['stp','Stempel','Diameter'],['gab','TTD + Stempel gabungan','Tinggi']].map(([k,t,u]) => `
+    <div class="card" style="padding:10px 12px 0"><div class="tt" style="font-weight:650;margin-bottom:6px">${t}</div>
+      <div class="g2 keep" style="grid-template-columns:1fr 1fr 1fr;gap:0 8px">
+        <label class="f">${u} (mm)<input id="s_${k}_${k==='stp'?'d':'h'}_mm" type="number" step="1" value="${v(k + '_' + (k==='stp'?'d':'h') + '_mm')}"></label>
+        <label class="f">Posisi X<input id="s_${k}_x_mm" type="number" step="1" value="${v(k + '_x_mm')}"></label>
+        <label class="f">Posisi Y<input id="s_${k}_y_mm" type="number" step="1" value="${v(k + '_y_mm')}"></label>
+      </div></div>`).join('')}
 
     <h3 class="sec">Pejabat penandatangan</h3>
     ${I('nama_kepala', 'Nama Kepala Madrasah (beserta gelar)')}
@@ -724,7 +733,7 @@ $('#v-set').addEventListener('click', async e => {
     catch (err) { toast(err.message, true); }
   }
   if (t.id === 'saveSet') {
-    const keys = ['nama_kepala','nip_kepala','jabatan_kepala','nama_madrasah','pejabat_pemberi','tempat_surat','template_nomor','tempat_berangkat_default','alat_default','pembebanan_default','ttd_tinggi_mm','stempel_ukuran_mm','stempel_geser_x_mm','stempel_geser_y_mm'];
+    const keys = ['nama_kepala','nip_kepala','jabatan_kepala','nama_madrasah','pejabat_pemberi','tempat_surat','template_nomor','tempat_berangkat_default','alat_default','pembebanan_default','ttd_h_mm','ttd_x_mm','ttd_y_mm','stp_d_mm','stp_x_mm','stp_y_mm','gab_h_mm','gab_x_mm','gab_y_mm'];
     const d = {}; keys.forEach(k => d[k] = $('#s_' + k).value.trim());
     t.disabled = true;
     try { const j = await api('saveSettings', { data: d }); S.settings = j.settings; cacheNow(); toast('Pengaturan tersimpan.'); }
@@ -732,7 +741,7 @@ $('#v-set').addEventListener('click', async e => {
     t.disabled = false;
   }
   if (t.id === 'sample') {
-    ['ttd_tinggi_mm','stempel_ukuran_mm','stempel_geser_x_mm','stempel_geser_y_mm','nama_kepala','nip_kepala','jabatan_kepala','nama_madrasah','pejabat_pemberi','tempat_surat'].forEach(k => { const el = $('#s_' + k); if (el) S.settings[k] = el.value.trim(); });
+    ['ttd_h_mm','ttd_x_mm','ttd_y_mm','stp_d_mm','stp_x_mm','stp_y_mm','gab_h_mm','gab_x_mm','gab_y_mm','nama_kepala','nip_kepala','jabatan_kepala','nama_madrasah','pejabat_pemberi','tempat_surat'].forEach(k => { const el = $('#s_' + k); if (el) S.settings[k] = el.value.trim(); });
     openPreview(sampleData());
   }
   if (t.id === 'chPw') {
@@ -764,7 +773,7 @@ function processImage(file, kind) {
     img.onerror = () => reject(new Error('Gambar tidak dapat dibaca.'));
     img.onload = () => {
       URL.revokeObjectURL(u);
-      const maxW = kind === 'kop' ? 1600 : 600;
+      const maxW = kind === 'kop' ? 1600 : kind === 'gabungan' ? 900 : 600;
       const sc = Math.min(1, maxW / img.naturalWidth);
       const w = Math.round(img.naturalWidth * sc), h = Math.round(img.naturalHeight * sc);
       const c = document.createElement('canvas'); c.width = w; c.height = h;
@@ -773,8 +782,8 @@ function processImage(file, kind) {
         const id = x.getImageData(0, 0, w, h), p = id.data;
         for (let i = 0; i < p.length; i += 4) {
           const lum = .299 * p[i] + .587 * p[i+1] + .114 * p[i+2];
-          if (lum > 238) p[i+3] = 0;
-          else if (lum > 190) p[i+3] = Math.min(p[i+3], Math.round((238 - lum) / 48 * 255));
+          if (lum > 242) p[i+3] = 0;
+          else if (lum > 215) p[i+3] = Math.min(p[i+3], Math.round((242 - lum) / 27 * 255));
         }
         x.putImageData(id, 0, 0);
         trimCanvas(c);
