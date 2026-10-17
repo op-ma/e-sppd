@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14532d">
+<title>SPPD MA Al-Ma'tuq</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+:root{
+  --g:#1b7a3d; --gd:#14532d; --gl:#e7f3ec; --r:#c0272d;
+  --bg:#f3f6f4; --card:#fff; --tx:#1c2a22; --mu:#667a6e; --bd:#d9e3dc;
+  --sh:0 1px 2px rgba(20,60,35,.08),0 4px 14px rgba(20,60,35,.06);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+.hide{display:none!important}
+
+/* ---------- login ---------- */
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.lcard{width:100%;max-width:400px;background:var(--card);border-radius:18px;box-shadow:var(--sh);padding:28px 22px}
+.lcard h1{margin:10px 0 2px;font-size:20px;color:var(--gd)}
+.lcard p{margin:0 0 18px;color:var(--mu);font-size:13.5px}
+.logo{width:56px;height:56px;border-radius:14px;background:var(--g);display:grid;place-items:center}
+.logo svg{width:30px;height:30px}
+
+/* ---------- layout ---------- */
+header.top{position:sticky;top:0;z-index:20;background:var(--gd);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px}
+header.top h2{margin:0;font-size:17px;flex:1;font-weight:650}
+header.top .sub{font-size:12px;opacity:.75;font-weight:400;display:block}
+#status{font-size:11px;padding:3px 8px;border-radius:99px;background:rgba(255,255,255,.18)}
+main{max-width:820px;margin:0 auto;padding:14px 14px 96px}
+nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:20;background:#fff;border-top:1px solid var(--bd);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs button{flex:1;border:0;background:none;padding:9px 4px 8px;color:var(--mu);font-size:11.5px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
+nav.tabs button svg{width:22px;height:22px}
+nav.tabs button.on{color:var(--g);font-weight:650}
+.fab{position:fixed;right:16px;bottom:calc(74px + env(safe-area-inset-bottom));z-index:21;background:var(--r);color:#fff;border:0;border-radius:99px;padding:13px 20px;font-weight:650;box-shadow:0 6px 18px rgba(192,39,45,.4);display:flex;gap:8px;align-items:center;cursor:pointer}
+.fab svg{width:18px;height:18px}
+
+/* ---------- komponen ---------- */
+.card{background:var(--card);border-radius:14px;box-shadow:var(--sh);padding:14px;margin-bottom:10px}
+.search{width:100%;padding:11px 14px;border:1px solid var(--bd);border-radius:12px;background:#fff;margin-bottom:12px}
+.item .t1{font-weight:650}
+.item .t2{color:var(--mu);font-size:13px;margin-top:1px}
+.item .row{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.badge{font-size:11.5px;background:var(--gl);color:var(--gd);padding:2px 8px;border-radius:99px;white-space:nowrap}
+.acts{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.btn{border:1px solid var(--bd);background:#fff;border-radius:10px;padding:8px 13px;cursor:pointer;font-size:13.5px}
+.btn.p{background:var(--g);border-color:var(--g);color:#fff;font-weight:600}
+.btn.d{color:var(--r)}
+.btn:disabled{opacity:.55}
+.empty{text-align:center;color:var(--mu);padding:40px 10px}
+h3.sec{margin:18px 2px 8px;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mu)}
+label.f{display:block;margin-bottom:11px;font-size:12.5px;color:var(--mu)}
+label.f input,label.f select,label.f textarea{display:block;width:100%;margin-top:4px;padding:10px 12px;border:1px solid var(--bd);border-radius:10px;background:#fff;color:var(--tx);font-size:15px}
+label.f textarea{min-height:64px;resize:vertical}
+label.f input:focus,label.f select:focus,label.f textarea:focus,.search:focus{outline:2px solid #8fcca6;border-color:var(--g)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+@media(max-width:480px){.g2.keep{grid-template-columns:1fr 1fr}.g2:not(.keep){grid-template-columns:1fr}}
+.hint{font-size:12px;color:var(--mu);margin:-6px 0 10px}
+.warn{background:#fff6e0;border:1px solid #f0d9a0;color:#7a5600;border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:12px}
+
+/* ---------- aset ---------- */
+.aset{display:flex;gap:12px;align-items:center}
+.aset .pv{width:110px;height:70px;border:1px dashed var(--bd);border-radius:10px;display:grid;place-items:center;background:
+ conic-gradient(#f0f0f0 25%,#fff 0 50%,#f0f0f0 0 75%,#fff 0) 0 0/12px 12px;overflow:hidden;flex:none}
+.aset .pv img{max-width:100%;max-height:100%}
+.aset .pv span{font-size:11px;color:var(--mu);text-align:center;padding:4px}
+.aset .tt{font-weight:650}
+.aset .ds{font-size:12.5px;color:var(--mu)}
+
+/* ---------- modal ---------- */
+.modal{position:fixed;inset:0;z-index:50;background:var(--bg);overflow:auto;display:flex;flex-direction:column}
+.modal .mh{position:sticky;top:0;background:var(--gd);color:#fff;padding:12px 14px;display:flex;align-items:center;gap:10px;z-index:2}
+.modal .mh h3{margin:0;font-size:16px;flex:1}
+.modal .mh .btn{background:rgba(255,255,255,.15);border-color:transparent;color:#fff}
+.modal .mh .btn.p{background:#fff;color:var(--gd)}
+.modal .mb{padding:14px;max-width:760px;width:100%;margin:0 auto}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#1c2a22;color:#fff;padding:10px 16px;border-radius:12px;z-index:99;font-size:14px;max-width:90vw;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.on{opacity:1}
+#toast.err{background:#a31d22}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-right-color:transparent;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ============ LEMBAR CETAK (A4) ============ */
+#preview{background:#5b6b61}
+#preview .pvbody{padding:14px 0 40px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.scaler{transform-origin:top left}
+.sheet{width:210mm;height:296.5mm;background:#fff;position:relative;overflow:hidden;
+  padding:0 20mm 8mm 30mm;font-family:"Times New Roman","Liberation Serif",Times,serif;font-size:12pt;line-height:1.3;color:#000;
+  box-shadow:0 2px 14px rgba(0,0,0,.35);break-after:page}
+.sheet:last-child{break-after:auto}
+.kop{position:relative;margin:2.5mm 0 0 -22mm;width:192mm;height:45.4mm}
+.kop img{width:100%;height:100%;display:block}
+.kop .ph{width:100%;height:100%;border:1px dashed #999;display:grid;place-items:center;color:#999;font:12px sans-serif}
+.sheet .jdl{text-align:center;font-weight:bold;text-decoration:underline;margin-top:3mm}
+.sheet .nomor{text-align:center}
+.sheet p{margin:0}
+.kv{display:grid;grid-template-columns:36mm 1fr;margin-left:6mm}
+.kv b{font-weight:bold}
+.pg1 .body{padding-left:12mm}
+.pg1 .gap{height:5mm}
+.pg1 .ttdblok{margin-left:68mm;margin-top:10mm}
+.just{text-align:justify}
+
+.sigbox{position:relative;width:50mm}
+.sigbox img{position:absolute;max-width:none;transform:translate(-50%,-50%)}
+.sigbox .stp{mix-blend-mode:multiply;opacity:.92}
+.nm{font-weight:bold}
+
+.pg2 .jdl2{text-align:center;font-weight:bold;font-size:13pt;margin-top:3mm;margin-bottom:6mm}
+table.t2{width:calc(100% + 8mm);margin-left:-4mm;border-collapse:collapse;table-layout:fixed;font-size:12pt}
+table.t2 td{border:1px solid #000;padding:.6mm 2mm;vertical-align:top}
+table.t2 td.no{text-align:center;width:9mm}
+table.t2 td.lb{width:82mm}
+table.t2 div+div{margin-top:.3mm}
+.pg2 .ttdblok{margin-left:78mm;margin-top:10mm;display:grid;grid-template-columns:30mm 1fr;row-gap:2mm}
+.pg2 .kepala{grid-column:1/3}
+
+.pg3 .jdl3{text-align:center;font-weight:bold;letter-spacing:.35em;margin-top:3mm;margin-bottom:4mm}
+table.t3{width:calc(100% + 8mm);margin-left:-4mm;border-collapse:collapse;table-layout:fixed;font-size:11pt}
+table.t3 td{border:1px solid #000;padding:1mm 2mm;vertical-align:top}
+table.t3 .l{width:47%}
+table.t3 .kv3{display:grid;grid-template-columns:37mm 1fr}
+table.t3 .sg{margin-top:1mm}
+table.t3 .dots{margin-top:6mm}
+
+#printArea{display:none}
+
+@media print{
+  @page{size:A4;margin:0}
+  html,body{background:#fff!important}
+  body>*:not(#preview){display:none!important}
+  #preview{position:static!important;display:block!important;background:#fff!important;overflow:visible!important}
+  #preview .mh{display:none!important}
+  #preview .pvbody{padding:0;gap:0;display:block}
+  .scaler{transform:none!important;width:auto!important;height:auto!important;margin:0!important}
+  .sheet{box-shadow:none;margin:0}
+  .kop .ph{border:0;color:transparent}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div id="login" class="hide">
+  <form class="lcard" id="loginForm" autocomplete="on">
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg></div>
+    <h1>Sistem SPPD</h1>
+    <p>Surat Perintah Tugas &amp; Perjalanan Dinas — MA Al-Ma’tuq</p>
+    <label class="f" id="apiWrap">URL Web App (Apps Script)
+      <input id="apiUrl" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off">
+    </label>
+    <label class="f">Kata sandi
+      <input id="pw" type="password" autocomplete="current-password" required>
+    </label>
+    <button class="btn p" style="width:100%;padding:12px" id="loginBtn">Masuk</button>
+    <p id="loginErr" style="color:var(--r);margin:12px 0 0;min-height:18px"></p>
+  </form>
+</div>
+
+<!-- ================= APLIKASI ================= -->
+<div id="app" class="hide">
+  <header class="top">
+    <h2 id="ttl">Daftar SPPD<span class="sub">MA Al-Ma’tuq</span></h2>
+    <span id="status">…</span>
+  </header>
+  <main>
+    <section id="v-sppd">
+      <input class="search" id="q" type="search" placeholder="Cari nama, nomor, kegiatan…">
+      <div id="listSppd"></div>
+    </section>
+    <section id="v-pegawai" class="hide">
+      <input class="search" id="qp" type="search" placeholder="Cari pegawai…">
+      <div id="listPegawai"></div>
+    </section>
+    <section id="v-set" class="hide"></section>
+  </main>
+  <button class="fab" id="fab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span id="fabTxt">Buat SPPD</span></button>
+  <nav class="tabs">
+    <button data-tab="sppd" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg>Surat</button>
+    <button data-tab="pegawai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.6-3.6 3-5.4 6-5.4s5.4 1.8 6 5.4M16 5.5a3 3 0 0 1 0 5.6M18 14.8c1.8.7 2.8 2.4 3.2 5.2"/></svg>Pegawai</button>
+    <button data-tab="set"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Pengaturan</button>
+  </nav>
+</div>
+
+<div id="modalHost"></div>
+<div id="preview" class="modal hide"></div>
+<div id="toast"></div>
+
+<script>
+/* =====================================================================
+ *  KONFIGURASI
+ *  (Opsional) isi URL Web App di sini supaya tidak perlu mengetik di login.
+ * ===================================================================== */
+const API_URL_DEFAULT = '';
+
+/* =====================================================================
+ *  UTIL
+ * ===================================================================== */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const HARI = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+const parseD = iso => { const [y,m,d] = iso.split('-').map(Number); return new Date(y, m-1, d); };
+const tglID = iso => iso ? `${+iso.slice(8,10)} ${BULAN[+iso.slice(5,7)-1]} ${iso.slice(0,4)}` : '';
+const hariID = iso => iso ? HARI[parseD(iso).getDay()] : '';
+const lamaHari = (a, b) => (a && b) ? Math.max(1, Math.round((parseD(b) - parseD(a)) / 864e5) + 1) : '';
+const todayISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+const ROMAWI = ['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
+const dash = v => (v && String(v).trim()) ? v : '-';
+/* nama sebelum gelar (sebelum koma pertama) dijadikan huruf kapital */
+const upName = n => { n = String(n || ''); const i = n.indexOf(','); return i < 0 ? n.toUpperCase() : n.slice(0, i).toUpperCase() + n.slice(i); };
+
+let toastT;
+function toast(msg, err) {
+  const t = $('#toast'); t.textContent = msg; t.className = 'on' + (err ? ' err' : '');
+  clearTimeout(toastT); toastT = setTimeout(() => t.className = '', 3200);
+}
+const LS = {
+  get(k, d = null) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+};
+
+/* =====================================================================
+ *  STATE + API
+ * ===================================================================== */
+const S = { settings: {}, pegawai: [], sppd: [], aset: { kop: '', stempel: '', ttd: '' }, token: null, tab: 'sppd', online: true };
+
+function apiUrl() { return LS.get('sppd_api') || API_URL_DEFAULT; }
+
+async function api(action, payload = {}) {
+  const url = apiUrl();
+  if (!url) throw new Error('URL Web App belum diisi.');
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },   // hindari preflight CORS
+    body: JSON.stringify({ action, token: S.token, ...payload })
+  });
+  let j;
+  try { j = await res.json(); } catch (e) { throw new Error('Respons server tidak valid. Pastikan Web App di-deploy untuk "Anyone".'); }
+  if (j.auth === false) { doLogout(true); throw new Error(j.error); }
+  if (!j.ok) throw new Error(j.error || 'Terjadi kesalahan.');
+  return j;
+}
+
+function setStatus(t) { $('#status').textContent = t; }
+
+async function loadAll(silent) {
+  try {
+    if (!silent) setStatus('Memuat…');
+    const j = await api('bootstrap');
+    S.settings = j.settings; S.pegawai = j.pegawai; S.sppd = j.sppd;
+    LS.set('sppd_cache', { settings: j.settings, pegawai: j.pegawai, sppd: j.sppd });
+    S.online = true; setStatus('Online');
+    renderAll();
+    await loadAset();
+  } catch (e) {
+    S.online = false; setStatus('Offline');
+    if (!silent || !S.sppd.length) toast(e.message, true);
+  }
+}
+
+async function loadAset() {
+  const ver = S.settings.aset_versi || '0';
+  const c = LS.get('sppd_aset');
+  if (c && c.ver === ver) { S.aset = c.aset; return; }
+  try {
+    const j = await api('getAset');
+    S.aset = j.aset;
+    LS.set('sppd_aset', { ver, aset: j.aset });
+    if (!$('#v-set').classList.contains('hide')) renderSettings();
+  } catch (e) { if (c) S.aset = c.aset; }
+}
+
+/* =====================================================================
+ *  LOGIN / LOGOUT
+ * ===================================================================== */
+function showLogin() {
+  $('#app').classList.add('hide'); $('#login').classList.remove('hide');
+  $('#apiUrl').value = apiUrl() || '';
+  $('#apiWrap').classList.toggle('hide', !!(API_URL_DEFAULT));
+}
+function doLogout(expired) {
+  S.token = null; LS.del('sppd_tok');
+  showLogin();
+  if (expired) $('#loginErr').textContent = 'Sesi berakhir, silakan login ulang.';
+}
+$('#loginForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const u = $('#apiUrl').value.trim() || API_URL_DEFAULT;
+  if (!/^https:\/\/script\.google\.com\/.+\/exec/.test(u)) { $('#loginErr').textContent = 'URL Web App tidak valid (harus berakhiran /exec).'; return; }
+  LS.set('sppd_api', u);
+  const b = $('#loginBtn'); b.disabled = true; b.innerHTML = '<span class="spin"></span>';
+  $('#loginErr').textContent = '';
+  try {
+    const j = await api('login', { password: $('#pw').value });
+    S.token = j.token; LS.set('sppd_tok', j.token);
+    $('#pw').value = '';
+    await enterApp();
+    if (j.passwordDefault) toast('Kata sandi masih bawaan — segera ganti di Pengaturan.', true);
+  } catch (err) { $('#loginErr').textContent = err.message; }
+  b.disabled = false; b.textContent = 'Masuk';
+});
+
+async function enterApp() {
+  $('#login').classList.add('hide'); $('#app').classList.remove('hide');
+  switchTab(S.tab);
+  await loadAll();
+}
+
+/* =====================================================================
+ *  TAB / RENDER
+ * ===================================================================== */
+function switchTab(t) {
+  S.tab = t;
+  $$('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+  $('#v-sppd').classList.toggle('hide', t !== 'sppd');
+  $('#v-pegawai').classList.toggle('hide', t !== 'pegawai');
+  $('#v-set').classList.toggle('hide', t !== 'set');
+  $('#fab').classList.toggle('hide', t === 'set');
+  $('#fabTxt').textContent = t === 'pegawai' ? 'Tambah Pegawai' : 'Buat SPPD';
+  $('#ttl').innerHTML = (t === 'sppd' ? 'Daftar SPPD' : t === 'pegawai' ? 'Data Pegawai' : 'Pengaturan') + '<span class="sub">MA Al-Ma’tuq</span>';
+  window.scrollTo(0, 0);
+  renderAll();
+}
+$$('nav.tabs button').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
+$('#fab').onclick = () => S.tab === 'pegawai' ? openPegawai() : openForm();
+$('#q').oninput = renderSppd; $('#qp').oninput = renderPegawai;
+
+function renderAll() { renderSppd(); renderPegawai(); if (S.tab === 'set') renderSettings(); }
+
+function renderSppd() {
+  const q = $('#q').value.trim().toLowerCase();
+  const rows = S.sppd.filter(s => !q || [s.nama, s.nomor, s.kegiatan, s.tempatTujuan].join(' ').toLowerCase().includes(q));
+  $('#listSppd').innerHTML = rows.length ? rows.map(s => `
+    <div class="card item" data-id="${esc(s.id)}">
+      <div class="row"><div><div class="t1">${esc(s.nama)}</div><div class="t2">${esc(s.kegiatan || s.maksud)}</div></div>
+      <span class="badge">${esc(tglID(s.tglBerangkat))}</span></div>
+      <div class="t2" style="margin-top:6px">No. ${esc(s.nomor)} · ${esc(s.tempatTujuan)}</div>
+      <div class="acts">
+        <button class="btn p" data-a="cetak">Lihat / Cetak</button>
+        <button class="btn" data-a="edit">Ubah</button>
+        <button class="btn" data-a="dup">Duplikat</button>
+        <button class="btn d" data-a="del">Hapus</button>
+      </div></div>`).join('') : `<div class="empty">${S.sppd.length ? 'Tidak ada hasil.' : 'Belum ada SPPD.<br>Ketuk “Buat SPPD” untuk memulai.'}</div>`;
+}
+$('#listSppd').onclick = async e => {
+  const b = e.target.closest('[data-a]'); if (!b) return;
+  const s = S.sppd.find(x => x.id === b.closest('.item').dataset.id); if (!s) return;
+  const a = b.dataset.a;
+  if (a === 'cetak') openPreview(s);
+  if (a === 'edit') openForm(s);
+  if (a === 'dup') openForm({ ...s, id: '', nomor: '', urut: '', tahun: '' }, true);
+  if (a === 'del') {
+    if (!confirm(`Hapus SPPD atas nama ${s.nama}?`)) return;
+    try { await api('deleteSppd', { id: s.id }); S.sppd = S.sppd.filter(x => x.id !== s.id); cacheNow(); renderSppd(); toast('SPPD dihapus.'); }
+    catch (err) { toast(err.message, true); }
+  }
+};
+function cacheNow() { LS.set('sppd_cache', { settings: S.settings, pegawai: S.pegawai, sppd: S.sppd }); }
+
+function renderPegawai() {
+  const q = $('#qp').value.trim().toLowerCase();
+  const rows = S.pegawai.filter(p => !q || [p.nama, p.jabatan, p.nip].join(' ').toLowerCase().includes(q));
+  $('#listPegawai').innerHTML = rows.length ? rows.map(p => `
+    <div class="card item" data-id="${esc(p.id)}">
+      <div class="row"><div><div class="t1">${esc(p.nama)}</div><div class="t2">${esc(p.jabatan || '-')}${p.nip ? ' · NIP ' + esc(p.nip) : ''}</div></div></div>
+      <div class="acts"><button class="btn" data-a="edit">Ubah</button><button class="btn d" data-a="del">Hapus</button></div></div>`).join('')
+    : `<div class="empty">${S.pegawai.length ? 'Tidak ada hasil.' : 'Belum ada data pegawai.<br>Tambahkan agar bisa dipilih saat membuat SPPD.'}</div>`;
+}
+$('#listPegawai').onclick = async e => {
+  const b = e.target.closest('[data-a]'); if (!b) return;
+  const p = S.pegawai.find(x => x.id === b.closest('.item').dataset.id); if (!p) return;
+  if (b.dataset.a === 'edit') openPegawai(p);
+  if (b.dataset.a === 'del') {
+    if (!confirm(`Hapus pegawai ${p.nama}?`)) return;
+    try { await api('deletePegawai', { id: p.id }); S.pegawai = S.pegawai.filter(x => x.id !== p.id); cacheNow(); renderPegawai(); toast('Pegawai dihapus.'); }
+    catch (err) { toast(err.message, true); }
+  }
+};
+
+/* =====================================================================
+ *  MODAL HELPER
+ * ===================================================================== */
+function openModal(title, bodyHtml, onSave, saveLabel = 'Simpan') {
+  const m = document.createElement('div'); m.className = 'modal';
+  m.innerHTML = `<div class="mh"><button class="btn" data-x>Batal</button><h3>${esc(title)}</h3><button class="btn p" data-s>${saveLabel}</button></div><div class="mb">${bodyHtml}</div>`;
+  $('#modalHost').appendChild(m);
+  document.body.style.overflow = 'hidden';
+  const close = () => { m.remove(); if (!$('#modalHost').children.length) document.body.style.overflow = ''; };
+  $('[data-x]', m).onclick = close;
+  $('[data-s]', m).onclick = async ev => {
+    const b = ev.currentTarget; b.disabled = true; const old = b.innerHTML; b.innerHTML = '<span class="spin" style="border-color:var(--gd);border-right-color:transparent"></span>';
+    try { await onSave(m, close); } catch (e) { toast(e.message, true); }
+    b.disabled = false; b.innerHTML = old;
+  };
+  return m;
+}
+const val = (m, id) => $('#' + id, m).value.trim();
+
+/* =====================================================================
+ *  FORM PEGAWAI
+ * ===================================================================== */
+function openPegawai(p = {}) {
+  const m = openModal(p.id ? 'Ubah Pegawai' : 'Tambah Pegawai', `
+    <label class="f">Nama lengkap *<input id="p_nama" value="${esc(p.nama)}"></label>
+    <label class="f">NIP / NUPTK<input id="p_nip" value="${esc(p.nip)}"></label>
+    <label class="f">Jabatan<input id="p_jabatan" value="${esc(p.jabatan)}" placeholder="mis. Operator"></label>
+    <label class="f">Pangkat dan Golongan<input id="p_pangkat" value="${esc(p.pangkat)}" placeholder="-"></label>
+    <div class="g2 keep"><label class="f">Gaji Pokok<input id="p_gaji" value="${esc(p.gaji)}" placeholder="-"></label>
+    <label class="f">Tingkat PD<input id="p_tingkat" value="${esc(p.tingkat)}" placeholder="-"></label></div>`,
+  async (m, close) => {
+    const d = { id: p.id || '', nama: val(m,'p_nama'), nip: val(m,'p_nip'), jabatan: val(m,'p_jabatan'), pangkat: val(m,'p_pangkat'), gaji: val(m,'p_gaji'), tingkat: val(m,'p_tingkat') };
+    if (!d.nama) throw new Error('Nama wajib diisi.');
+    const j = await api('savePegawai', { data: d });
+    const i = S.pegawai.findIndex(x => x.id === j.data.id);
+    if (i >= 0) S.pegawai[i] = j.data; else S.pegawai.push(j.data);
+    S.pegawai.sort((a, b) => a.nama.localeCompare(b.nama));
+    cacheNow(); renderPegawai(); close(); toast('Pegawai tersimpan.');
+  });
+}
+
+/* =====================================================================
+ *  FORM SPPD
+ * ===================================================================== */
+function nextNumber(tahun, bulan) {
+  let max = 0;
+  S.sppd.forEach(s => { if (String(s.tahun) === String(tahun)) { const n = parseInt(s.urut, 10); if (n > max) max = n; } });
+  const urut = String(max + 1).padStart(3, '0');
+  const tpl = S.settings.template_nomor || 'Mas.10.02/{urut}/PP.00.6/021/{bulan}/{tahun}';
+  return { urut, nomor: tpl.replace(/\{urut\}/g, urut).replace(/\{bulan\}/g, ROMAWI[bulan]).replace(/\{tahun\}/g, tahun) };
+}
+
+function openForm(s = null, isDup = false) {
+  const st = S.settings, isNew = !s || isDup;
+  const d = Object.assign({
+    tglSurat: todayISO(), tempatSurat: st.tempat_surat || '', tglBerangkat: todayISO(), tglKembali: todayISO(),
+    asalMadrasah: st.nama_madrasah || '', pukul: '08.00 s.d. selesai', alat: st.alat_default || '',
+    tempatBerangkat: st.tempat_berangkat_default || '', pembebanan: st.pembebanan_default || ''
+  }, s || {});
+  if (isDup) { d.tglSurat = todayISO(); }
+  const opt = S.pegawai.map(p => `<option value="${esc(p.id)}" ${p.id === d.pegawaiId ? 'selected' : ''}>${esc(p.nama)}</option>`).join('');
+  const T = (id, label, extra = '') => `<label class="f">${label}<input id="f_${id}" value="${esc(d[id])}" ${extra}></label>`;
+  const m = openModal(isNew ? 'SPPD Baru' : 'Ubah SPPD', `
+    <h3 class="sec">Surat</h3>
+    ${T('nomor','Nomor surat')}
+    <div class="hint">Nomor terisi otomatis dari template di Pengaturan; boleh diubah manual.</div>
+    <div class="g2 keep"><label class="f">Tanggal surat<input id="f_tglSurat" type="date" value="${esc(d.tglSurat)}"></label>${T('tempatSurat','Ditetapkan di')}</div>
+
+    <h3 class="sec">Pegawai yang ditugaskan</h3>
+    <label class="f">Pilih dari data pegawai<select id="f_pegawaiId"><option value="">— isi manual —</option>${opt}</select></label>
+    ${T('nama','Nama *')}
+    <div class="g2">${T('jabatan','Jabatan')}${T('asalMadrasah','Asal madrasah')}</div>
+    <div class="g2">${T('nip','NIP')}${T('pangkat','Pangkat dan golongan','placeholder="-"')}</div>
+    <div class="g2 keep">${T('gaji','Gaji pokok','placeholder="-"')}${T('tingkat','Tingkat PD','placeholder="-"')}</div>
+
+    <h3 class="sec">Kegiatan</h3>
+    <label class="f">Nama kegiatan (untuk Surat Perintah Tugas)<textarea id="f_kegiatan">${esc(d.kegiatan)}</textarea></label>
+    ${T('maksud','Maksud perjalanan dinas (ringkas)','placeholder="mis. Sosialisasi UIN Jakarta"')}
+    <div class="g2 keep"><label class="f">Tanggal berangkat *<input id="f_tglBerangkat" type="date" value="${esc(d.tglBerangkat)}"></label>
+      <label class="f">Tanggal kembali<input id="f_tglKembali" type="date" value="${esc(d.tglKembali)}"></label></div>
+    <div class="hint" id="lamaInfo"></div>
+    <div class="g2">${T('pukul','Pukul')}${T('tempatTujuan','Tempat tujuan / pelaksanaan')}</div>
+
+    <h3 class="sec">Perjalanan &amp; anggaran</h3>
+    <div class="g2">${T('tempatBerangkat','Tempat berangkat')}${T('alat','Alat angkut')}</div>
+    <div class="g2">${T('pembebanan','Pembebanan anggaran')}${T('mataAnggaran','Mata anggaran','placeholder="-"')}</div>
+    <label class="f">Keterangan lain-lain<input id="f_keteranganLain" value="${esc(d.keteranganLain)}"></label>
+    <label class="f">Catatan lain-lain (halaman keterangan)<input id="f_catatan" value="${esc(d.catatan)}"></label>
+  `, async (m, close) => {
+    const g = id => val(m, 'f_' + id);
+    const out = { id: isDup ? '' : (d.id || '') };
+    ['nomor','tglSurat','tempatSurat','pegawaiId','nama','jabatan','asalMadrasah','nip','pangkat','gaji','tingkat','kegiatan','maksud','tglBerangkat','tglKembali','pukul','tempatTujuan','tempatBerangkat','alat','pembebanan','mataAnggaran','keteranganLain','catatan'].forEach(k => out[k] = g(k));
+    if (!out.nama) throw new Error('Nama pegawai wajib diisi.');
+    if (!out.tglBerangkat) throw new Error('Tanggal berangkat wajib diisi.');
+    if (!out.tglKembali || out.tglKembali < out.tglBerangkat) out.tglKembali = out.tglBerangkat;
+    out.lama = lamaHari(out.tglBerangkat, out.tglKembali);
+    out.urut = d.urut || ''; out.tahun = d.tahun || '';
+    if (!out.nomor) throw new Error('Nomor surat wajib diisi.');
+    const j = await api('saveSppd', { data: out });
+    const i = S.sppd.findIndex(x => x.id === j.data.id);
+    if (i >= 0) S.sppd[i] = j.data; else S.sppd.unshift(j.data);
+    cacheNow(); renderSppd(); close(); toast('SPPD tersimpan.');
+    openPreview(j.data);
+  }, 'Simpan');
+
+  /* nomor otomatis */
+  const setNo = () => {
+    if (!isNew) return;
+    const t = $('#f_tglSurat', m).value || todayISO();
+    const n = nextNumber(t.slice(0, 4), +t.slice(5, 7));
+    $('#f_nomor', m).value = n.nomor; d.urut = n.urut; d.tahun = t.slice(0, 4);
+  };
+  if (isNew) { setNo(); $('#f_tglSurat', m).addEventListener('change', setNo); }
+  else if (!d.urut) { /* data lama tanpa urut */ }
+
+  /* pilih pegawai → isi otomatis */
+  $('#f_pegawaiId', m).onchange = e => {
+    const p = S.pegawai.find(x => x.id === e.target.value); if (!p) return;
+    ['nama','nip','jabatan','pangkat','gaji','tingkat'].forEach(k => $('#f_' + k, m).value = p[k] || '');
+  };
+  /* lama perjalanan */
+  const upd = () => {
+    const a = $('#f_tglBerangkat', m).value; let b = $('#f_tglKembali', m).value;
+    if (a && (!b || b < a)) { b = a; $('#f_tglKembali', m).value = a; }
+    $('#lamaInfo', m).textContent = a ? `Lamanya perjalanan: ${lamaHari(a, b)} hari — ${hariID(a)}, ${tglID(a)}` : '';
+  };
+  $('#f_tglBerangkat', m).addEventListener('change', upd);
+  $('#f_tglKembali', m).addEventListener('change', upd);
+  upd();
+}
+
+/* =====================================================================
+ *  PRATINJAU & CETAK  (3 halaman A4: Surat Tugas · SPPD · Keterangan)
+ * ===================================================================== */
+function sigBox(withSig) {
+  const st = S.settings, A = S.aset;
+  const ttdH = +st.ttd_tinggi_mm || 22, sz = +st.stempel_ukuran_mm || 30;
+  const gx = +st.stempel_geser_x_mm || 0, gy = +st.stempel_geser_y_mm || 0;
+  const H = Math.max(ttdH + 4, sz * .85);
+  let inner = '';
+  if (withSig && A.stempel) inner += `<img class="stp" src="${A.stempel}" style="width:${sz}mm;left:calc(50% + ${gx}mm);top:calc(50% + ${gy}mm)">`;
+  if (withSig && A.ttd) inner += `<img class="ttd" src="${A.ttd}" style="height:${ttdH}mm;left:50%;top:50%">`;
+  return `<div class="sigbox" style="height:${H}mm">${inner}</div>`;
+}
+function kopHtml() {
+  return `<div class="kop">${S.aset.kop ? `<img src="${S.aset.kop}" alt="">` : `<div class="ph">Kop surat belum diunggah (Pengaturan → Kop Surat)</div>`}</div>`;
+}
+
+function buildSheets(s, withSig) {
+  const st = S.settings;
+  const kepala = st.jabatan_kepala || 'Kepala Madrasah';
+  const nm = st.nama_kepala || '';
+  const nip = st.nip_kepala || '';
+  const sig = sigBox(withSig);
+  const sameDay = !s.tglKembali || s.tglKembali === s.tglBerangkat;
+  const hariTgl = sameDay ? `${hariID(s.tglBerangkat)}, ${tglID(s.tglBerangkat)}`
+    : `${hariID(s.tglBerangkat)}, ${tglID(s.tglBerangkat)} s.d. ${hariID(s.tglKembali)}, ${tglID(s.tglKembali)}`;
+  const lama = s.lama || lamaHari(s.tglBerangkat, s.tglKembali || s.tglBerangkat);
+  const tglSurat = tglID(s.tglSurat);
+  const kv = (a, b, bold) => `<div class="kv"><div>${a}</div><div>: ${bold ? `<b>${b}</b>` : b}</div></div>`;
+
+  /* ---------- Halaman 1 : Surat Perintah Tugas ---------- */
+  const p1 = `<section class="sheet pg1">${kopHtml()}
+    <div class="jdl">SURAT PERINTAH TUGAS</div>
+    <div class="nomor">Nomor : ${esc(s.nomor)}</div>
+    <div class="body">
+      <div class="gap"></div>
+      <p>Yang bertanda tangan di bawah ini:</p>
+      ${kv('Nama', esc(upName(nm)), true)}${kv('Jabatan', esc(kepala))}${kv('Asal Madrasah', esc(st.nama_madrasah))}
+      <div class="gap"></div>
+      <p>Memberikan tugas kepada:</p>
+      ${kv('Nama', esc(s.nama))}${kv('Asal Madrasah', esc(s.asalMadrasah || st.nama_madrasah))}${kv('Jabatan', esc(dash(s.jabatan)))}
+      <div class="gap"></div>
+      <p class="just">Untuk mengikuti kegiatan <b>“${esc(s.kegiatan || s.maksud)}”</b>.<br>Yang akan dilaksanakan pada:</p>
+      ${kv('Hari, Tanggal', esc(hariTgl))}${kv('Pukul', esc(s.pukul))}${kv('Tempat', esc(s.tempatTujuan))}
+      <div class="gap"></div><div class="gap"></div>
+      <p class="just">Demikian surat tugas ini kami buat untuk dilaksanakan dengan penuh tanggung jawab.<br>Atas perhatiannya kami sampaikan terima kasih.</p>
+      <div class="ttdblok">
+        <div>Ditetapkan di ${esc(s.tempatSurat)},</div>
+        <div>Pada tanggal ${esc(tglSurat)}</div>
+        <div>${esc(kepala)}</div>
+        ${sig}
+        <div class="nm">${esc(upName(nm))}</div>
+      </div>
+    </div></section>`;
+
+  /* ---------- Halaman 2 : SPPD ---------- */
+  const r = (n, l, v) => `<tr><td class="no">${n}</td><td class="lb">${l}</td><td>${v}</td></tr>`;
+  const p2 = `<section class="sheet pg2">${kopHtml()}
+    <div class="jdl2">Surat Perintah Perjalanan Dinas ( S P P D )</div>
+    <table class="t2">
+      ${r('1.', 'Pejabat yang memberi perintah', ': ' + esc(st.pejabat_pemberi))}
+      ${r('2.', 'Nama Pegawai yang melaksanakan perjalanan dinas', ': ' + esc(s.nama))}
+      ${r('3.', `<div>a. Pangkat dan Golongan</div><div>b. Jabatan</div><div>c. Gaji Pokok</div><div>d. Tingkat Menurut Peraturan Perjalanan Dinas</div>`,
+        `<div>: ${esc(dash(s.pangkat))}</div><div>: ${esc(dash(s.jabatan))}</div><div>: ${esc(dash(s.gaji))}</div><div>: ${esc(dash(s.tingkat))}</div>`)}
+      ${r('4.', 'Maksud Perjalanan dinas', ': ' + esc(s.maksud || s.kegiatan))}
+      ${r('5.', 'Alat angkut yang dipergunakan', ': ' + esc(s.alat))}
+      ${r('6.', `<div>a. Tempat Berangkat</div><div>b. Tempat Tujuan</div>`, `<div>: ${esc(s.tempatBerangkat)}</div><div>: ${esc(s.tempatTujuan)}</div>`)}
+      ${r('7.', `<div>a. Lamanya Perjalanan</div><div>b. Tanggal Berangkat</div><div>c. Tanggal Harus Kembali</div>`,
+        `<div>: ${esc(lama)} Hari</div><div>: ${esc(tglID(s.tglBerangkat))}</div><div>: ${esc(tglID(s.tglKembali || s.tglBerangkat))}</div>`)}
+      ${r('8.', `<div>a. Pembebanan Anggaran</div><div>b. Mata Anggaran</div>`, `<div>: ${esc(s.pembebanan)}</div><div>: ${esc(dash(s.mataAnggaran))}</div>`)}
+      ${r('9.', 'Keterangan Lain-lain', esc(s.keteranganLain))}
+    </table>
+    <div class="ttdblok">
+      <div>Dikeluarkan di</div><div>: ${esc(s.tempatSurat)}</div>
+      <div>Pada tanggal</div><div>: ${esc(tglSurat)}</div>
+      <div class="kepala">${esc(kepala)},</div>
+      <div class="kepala">${sig}</div>
+      <div class="kepala nm">${esc(nm)}</div>
+    </div></section>`;
+
+  /* ---------- Halaman 3 : Keterangan ---------- */
+  const dots = '……………………………………………..';
+  const k3 = (a, b) => `<div class="kv3"><div>${a}</div><div>: ${b || ''}</div></div>`;
+  const blank = (lab) => `${k3('Berangkat dari', '')}${k3('Ke', '')}${k3('Pada tanggal', '')}<div>${esc(kepala)},</div><div class="dots">${dots}</div><div>NIP.</div>`;
+  const p3 = `<section class="sheet pg3">${kopHtml()}
+    <div class="jdl3">Keterangan :</div>
+    <table class="t3">
+      <tr><td class="l"></td><td>
+        <div style="display:grid;grid-template-columns:7mm 1fr"><div>I.</div><div>
+          <div class="kv3"><div>Berangkat dari<br>(tempat Kedudukan)</div><div><br>: ${esc(s.tempatBerangkat)}</div></div>
+          ${k3('Ke', esc(s.tempatTujuan))}${k3('Pada tanggal', esc(tglID(s.tglBerangkat)))}
+          <div>${esc(kepala)},</div>${sig}<div>${esc(nm)}</div>
+        </div></div></td></tr>
+      <tr><td class="l"><div style="display:grid;grid-template-columns:7mm 1fr"><div>II.</div><div>
+          ${k3('Tiba di', '')}${k3('Pada tanggal', '')}<div class="dots">……………………………..,</div><div class="dots" style="margin-top:11mm">${dots}</div><div>NIP.</div></div></div></td>
+        <td>${blank()}</td></tr>
+      <tr><td class="l"><div style="display:grid;grid-template-columns:7mm 1fr"><div>III.</div><div>
+          ${k3('Tiba di', '')}${k3('Pada tanggal', '')}<div>${esc(kepala)},</div><div class="dots" style="margin-top:14mm">${dots}</div><div>NIP.</div></div></div></td>
+        <td>${blank()}</td></tr>
+      <tr><td class="l"><div style="display:grid;grid-template-columns:7mm 1fr"><div>IV.</div><div>${k3('Tiba di<br>(Tempat Kedudukan)', '')}${k3('Pada tanggal', '')}</div></div></td>
+        <td>Telah diperiksa dengan keterangan bahwa perjalanan tersebut atas perintahnya dan semata-mata untuk kepentingan jabatan dalam waktu yang sesingkat-singkatnya.</td></tr>
+      <tr><td colspan="2"><div style="display:grid;grid-template-columns:7mm 1fr"><div>V.</div><div>Catatan Lain-lain : ${esc(s.catatan)}</div></div></td></tr>
+      <tr><td colspan="2"><div style="display:grid;grid-template-columns:7mm 1fr"><div>VI.</div><div>Perhatian :<br>PPK yang menerbitkan SPPD, pegawai yang melakukan perjalanan Dinas, para pejabat yang mengesahkan tanggal berangkat/tiba, serta bendahara pengeluaran bertanggung jawab berdasarkan peraturan-peraturan keuangan Negara apabila Negara menderita rugi akibat kesalahan, kelalaian dan kealpaannya.</div></div></td></tr>
+    </table></section>`;
+  return p1 + p2 + p3;
+}
+
+let pvState = null;
+function openPreview(s, withSig = true) {
+  pvState = { s, withSig };
+  const pv = $('#preview');
+  pv.classList.remove('hide'); document.body.style.overflow = 'hidden';
+  pv.innerHTML = `<div class="mh">
+      <button class="btn" id="pvX">Tutup</button><h3>Pratinjau</h3>
+      <label style="font-size:12.5px;display:flex;gap:6px;align-items:center"><input type="checkbox" id="pvSig" ${withSig ? 'checked' : ''}>TTD &amp; stempel</label>
+      <button class="btn p" id="pvPrint">Cetak / PDF</button></div>
+    <div class="pvbody" id="pvBody"></div>`;
+  $('#pvX').onclick = closePreview;
+  $('#pvPrint').onclick = () => window.print();
+  $('#pvSig').onchange = e => { pvState.withSig = e.target.checked; paintPreview(); };
+  paintPreview();
+}
+function paintPreview() {
+  const body = $('#pvBody'); if (!body || !pvState) return;
+  const html = buildSheets(pvState.s, pvState.withSig);
+  const tmp = document.createElement('div'); tmp.innerHTML = html;
+  body.innerHTML = '';
+  [...tmp.children].forEach(sh => { const w = document.createElement('div'); w.className = 'scaler'; w.appendChild(sh); body.appendChild(w); });
+  fitPreview();
+}
+function fitPreview() {
+  const body = $('#pvBody'); if (!body) return;
+  const mm = 96 / 25.4, W = 210 * mm, H = 296.5 * mm;
+  const sc = Math.min(1, (window.innerWidth - 16) / W);
+  $$('.scaler', body).forEach(w => { w.style.transform = `scale(${sc})`; w.style.width = W + 'px'; w.style.height = H + 'px'; w.style.marginRight = (-(W * (1 - sc))) + 'px'; w.style.marginBottom = (-(H * (1 - sc))) + 'px'; });
+}
+window.addEventListener('resize', fitPreview);
+function closePreview() { $('#preview').classList.add('hide'); $('#preview').innerHTML = ''; pvState = null; document.body.style.overflow = ''; }
+
+/* =====================================================================
+ *  PENGATURAN
+ * ===================================================================== */
+const ASET_INFO = {
+  kop:     { t: 'Kop Surat',      d: 'Gambar kop selebar halaman (disarankan rasio ±2,5 : 0,6). Format PNG/JPG.', bg: false },
+  stempel: { t: 'Stempel',        d: 'PNG latar transparan paling bagus. Foto/scan akan dihapus latar putihnya otomatis.', bg: true },
+  ttd:     { t: 'Tanda Tangan',   d: 'Tanda tangan Kepala Madrasah. Foto/scan akan dihapus latar putihnya otomatis.', bg: true }
+};
+
+function renderSettings() {
+  const st = S.settings, v = k => esc(st[k] ?? '');
+  const I = (k, l, extra = '') => `<label class="f">${l}<input id="s_${k}" value="${v(k)}" ${extra}></label>`;
+  $('#v-set').innerHTML = `
+    <h3 class="sec">Kop, stempel &amp; tanda tangan</h3>
+    ${['kop', 'stempel', 'ttd'].map(k => `
+      <div class="card"><div class="aset">
+        <div class="pv">${S.aset[k] ? `<img src="${S.aset[k]}">` : '<span>Belum ada</span>'}</div>
+        <div style="flex:1"><div class="tt">${ASET_INFO[k].t}</div><div class="ds">${ASET_INFO[k].d}</div>
+          <div class="acts"><button class="btn p" data-up="${k}">Unggah</button>${S.aset[k] ? `<button class="btn d" data-rm="${k}">Hapus</button>` : ''}</div></div>
+      </div></div>`).join('')}
+    <input type="file" id="fileIn" accept="image/png,image/jpeg,image/webp" class="hide">
+    <div class="g2 keep">
+      <label class="f">Tinggi TTD (mm)<input id="s_ttd_tinggi_mm" type="number" step="1" value="${v('ttd_tinggi_mm')}"></label>
+      <label class="f">Diameter stempel (mm)<input id="s_stempel_ukuran_mm" type="number" step="1" value="${v('stempel_ukuran_mm')}"></label>
+      <label class="f">Geser stempel ← → (mm)<input id="s_stempel_geser_x_mm" type="number" step="1" value="${v('stempel_geser_x_mm')}"></label>
+      <label class="f">Geser stempel ↑ ↓ (mm)<input id="s_stempel_geser_y_mm" type="number" step="1" value="${v('stempel_geser_y_mm')}"></label>
+    </div>
+    <div class="hint">Atur posisi stempel terhadap tanda tangan, lalu simpan dan cek lewat “Pratinjau contoh”.</div>
+
+    <h3 class="sec">Pejabat penandatangan</h3>
+    ${I('nama_kepala', 'Nama Kepala Madrasah (beserta gelar)')}
+    ${I('nip_kepala', 'NIP Kepala Madrasah')}
+    ${I('jabatan_kepala', 'Jabatan')}
+    ${I('nama_madrasah', 'Asal madrasah (di Surat Tugas)')}
+    ${I('pejabat_pemberi', 'Pejabat yang memberi perintah (di SPPD)')}
+    ${I('tempat_surat', 'Tempat penetapan surat')}
+
+    <h3 class="sec">Isian bawaan</h3>
+    ${I('template_nomor', 'Template nomor surat')}
+    <div class="hint">Gunakan {urut} (001, 002…), {bulan} (romawi) dan {tahun}.</div>
+    ${I('tempat_berangkat_default', 'Tempat berangkat')}
+    ${I('alat_default', 'Alat angkut')}
+    ${I('pembebanan_default', 'Pembebanan anggaran')}
+    <div class="acts" style="margin-bottom:6px"><button class="btn p" id="saveSet">Simpan pengaturan</button><button class="btn" id="sample">Pratinjau contoh</button></div>
+
+    <h3 class="sec">Keamanan &amp; aplikasi</h3>
+    <div class="card">
+      <label class="f">Kata sandi lama<input id="pw0" type="password" autocomplete="current-password"></label>
+      <label class="f">Kata sandi baru (min. 6 karakter)<input id="pw1" type="password" autocomplete="new-password"></label>
+      <div class="acts"><button class="btn" id="chPw">Ganti kata sandi</button></div>
+    </div>
+    <div class="card">
+      <div class="t2" style="margin-bottom:8px;word-break:break-all;color:var(--mu);font-size:12.5px">Server: ${esc(apiUrl())}</div>
+      <div class="acts"><button class="btn hide" id="installBtn">Pasang aplikasi</button><button class="btn" id="refresh">Muat ulang data</button><button class="btn d" id="logout">Keluar</button></div>
+    </div>`;
+  if (deferredInstall) $('#installBtn').classList.remove('hide');
+}
+
+let upKind = null;
+$('#v-set').addEventListener('click', async e => {
+  const t = e.target.closest('button'); if (!t) return;
+  if (t.dataset.up) { upKind = t.dataset.up; const f = $('#fileIn'); f.value = ''; f.click(); }
+  if (t.dataset.rm) {
+    if (!confirm('Hapus ' + ASET_INFO[t.dataset.rm].t + '?')) return;
+    try { const j = await api('deleteAset', { jenis: t.dataset.rm }); S.aset[t.dataset.rm] = ''; S.settings.aset_versi = j.versi; LS.set('sppd_aset', { ver: j.versi, aset: S.aset }); renderSettings(); toast('Dihapus.'); }
+    catch (err) { toast(err.message, true); }
+  }
+  if (t.id === 'saveSet') {
+    const keys = ['nama_kepala','nip_kepala','jabatan_kepala','nama_madrasah','pejabat_pemberi','tempat_surat','template_nomor','tempat_berangkat_default','alat_default','pembebanan_default','ttd_tinggi_mm','stempel_ukuran_mm','stempel_geser_x_mm','stempel_geser_y_mm'];
+    const d = {}; keys.forEach(k => d[k] = $('#s_' + k).value.trim());
+    t.disabled = true;
+    try { const j = await api('saveSettings', { data: d }); S.settings = j.settings; cacheNow(); toast('Pengaturan tersimpan.'); }
+    catch (err) { toast(err.message, true); }
+    t.disabled = false;
+  }
+  if (t.id === 'sample') {
+    ['ttd_tinggi_mm','stempel_ukuran_mm','stempel_geser_x_mm','stempel_geser_y_mm','nama_kepala','nip_kepala','jabatan_kepala','nama_madrasah','pejabat_pemberi','tempat_surat'].forEach(k => { const el = $('#s_' + k); if (el) S.settings[k] = el.value.trim(); });
+    openPreview(sampleData());
+  }
+  if (t.id === 'chPw') {
+    try { await api('changePassword', { lama: $('#pw0').value, baru: $('#pw1').value }); $('#pw0').value = $('#pw1').value = ''; toast('Kata sandi diganti.'); }
+    catch (err) { toast(err.message, true); }
+  }
+  if (t.id === 'refresh') loadAll();
+  if (t.id === 'logout') { if (confirm('Keluar dari aplikasi?')) doLogout(); }
+  if (t.id === 'installBtn' && deferredInstall) { deferredInstall.prompt(); deferredInstall = null; t.classList.add('hide'); }
+});
+$('#v-set').addEventListener('change', async e => {
+  if (e.target.id !== 'fileIn' || !e.target.files[0]) return;
+  const kind = upKind;
+  try {
+    toast('Memproses gambar…');
+    const url = await processImage(e.target.files[0], kind);
+    const j = await api('uploadAset', { jenis: kind, dataUrl: url });
+    S.aset[kind] = url; S.settings.aset_versi = j.versi;
+    if (!LS.set('sppd_aset', { ver: j.versi, aset: S.aset })) toast('Tersimpan di server (cache offline penuh).');
+    else toast(ASET_INFO[kind].t + ' tersimpan.');
+    renderSettings();
+  } catch (err) { toast(err.message, true); }
+});
+
+/* ---- olah gambar: perkecil + hapus latar putih (stempel/ttd) ---- */
+function processImage(file, kind) {
+  return new Promise((resolve, reject) => {
+    const img = new Image(), u = URL.createObjectURL(file);
+    img.onerror = () => reject(new Error('Gambar tidak dapat dibaca.'));
+    img.onload = () => {
+      URL.revokeObjectURL(u);
+      const maxW = kind === 'kop' ? 1600 : 600;
+      const sc = Math.min(1, maxW / img.naturalWidth);
+      const w = Math.round(img.naturalWidth * sc), h = Math.round(img.naturalHeight * sc);
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0, w, h);
+      if (ASET_INFO[kind].bg) {
+        const id = x.getImageData(0, 0, w, h), p = id.data;
+        for (let i = 0; i < p.length; i += 4) {
+          const lum = .299 * p[i] + .587 * p[i+1] + .114 * p[i+2];
+          if (lum > 238) p[i+3] = 0;
+          else if (lum > 190) p[i+3] = Math.min(p[i+3], Math.round((238 - lum) / 48 * 255));
+        }
+        x.putImageData(id, 0, 0);
+        trimCanvas(c);
+      }
+      let out = c.toDataURL('image/png');
+      if (out.length > 800000) {
+        if (ASET_INFO[kind].bg) return reject(new Error('Gambar terlalu besar, gunakan gambar yang lebih sederhana.'));
+        out = c.toDataURL('image/jpeg', .85);
+        if (out.length > 800000) { const c2 = document.createElement('canvas'); c2.width = w * .7; c2.height = h * .7; c2.getContext('2d').drawImage(c, 0, 0, c2.width, c2.height); out = c2.toDataURL('image/jpeg', .82); }
+      }
+      resolve(out);
+    };
+    img.src = u;
+  });
+}
+function trimCanvas(c) {            // potong sisi transparan
+  const x = c.getContext('2d'), w = c.width, h = c.height, p = x.getImageData(0, 0, w, h).data;
+  let t = h, b = 0, l = w, r = 0;
+  for (let y = 0; y < h; y++) for (let xx = 0; xx < w; xx++) if (p[(y * w + xx) * 4 + 3] > 12) { if (y < t) t = y; if (y > b) b = y; if (xx < l) l = xx; if (xx > r) r = xx; }
+  if (b <= t || r <= l) return;
+  const nw = r - l + 1, nh = b - t + 1, d = x.getImageData(l, t, nw, nh);
+  c.width = nw; c.height = nh; c.getContext('2d').putImageData(d, 0, 0);
+}
+
+function sampleData() {
+  const n = new Date(); const iso = todayISO();
+  return { nomor: S.settings.template_nomor.replace('{urut}', '001').replace('{bulan}', ROMAWI[n.getMonth()+1]).replace('{tahun}', n.getFullYear()),
+    tglSurat: iso, tempatSurat: S.settings.tempat_surat, nama: 'Nama Pegawai Contoh', jabatan: 'Operator', asalMadrasah: S.settings.nama_madrasah,
+    kegiatan: 'Nama Kegiatan Contoh', maksud: 'Kegiatan Contoh', tglBerangkat: iso, tglKembali: iso, lama: 1, pukul: '08.00 s.d. selesai',
+    tempatTujuan: 'Tempat Tujuan Contoh', alat: S.settings.alat_default, tempatBerangkat: S.settings.tempat_berangkat_default, pembebanan: S.settings.pembebanan_default, catatan: '' };
+}
+
+/* =====================================================================
+ *  PWA
+ * ===================================================================== */
+let deferredInstall = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; const b = $('#installBtn'); if (b) b.classList.remove('hide'); });
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+window.addEventListener('online', () => { if (S.token) loadAll(true); });
+window.addEventListener('offline', () => setStatus('Offline'));
+
+/* =====================================================================
+ *  START
+ * ===================================================================== */
+(function start() {
+  S.token = LS.get('sppd_tok');
+  if (!apiUrl() || !S.token) { showLogin(); return; }
+  const c = LS.get('sppd_cache'); if (c) { S.settings = c.settings; S.pegawai = c.pegawai; S.sppd = c.sppd; }
+  const a = LS.get('sppd_aset'); if (a) S.aset = a.aset;
+  $('#login').classList.add('hide'); $('#app').classList.remove('hide');
+  switchTab('sppd');
+  loadAll(true);
+})();
+</script>
+</body>
+</html>
