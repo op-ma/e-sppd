@@ -206,9 +206,9 @@ table.t3 .dots{margin-top:6mm}
 <script>
 /* =====================================================================
  *  KONFIGURASI
- *  (Opsional) isi URL Web App di sini supaya tidak perlu mengetik di login.
+ *  Tempel URL Web App pada API_URL_DEFAULT di bawah (sekali saja). Jika kosong, kolom URL muncul di halaman login.
  * ===================================================================== */
-const API_URL_DEFAULT = '';
+const API_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbzGYlTb7-w4KcVG_MKT3X--irTeGYVykc0OhQiUYiqEcTv9HP5_seZ5RqzTHu-hBfn0sg/exec';   // ← tempel URL Web App (…/exec) di antara tanda kutip, contoh: 'https://script.google.com/macros/s/AKfy.../exec'
 
 /* =====================================================================
  *  UTIL
@@ -244,7 +244,9 @@ const LS = {
  * ===================================================================== */
 const S = { settings: {}, pegawai: [], sppd: [], aset: { kop: '', stempel: '', ttd: '', gabungan: '' }, token: null, tab: 'sppd', online: true };
 
-function apiUrl() { return LS.get('sppd_api') || API_URL_DEFAULT; }
+function apiUrl() { return API_URL_DEFAULT || LS.get('sppd_api') || ''; }
+/* tautan siap pakai: .../index.html?api=URL_EXEC  → URL tersimpan otomatis di perangkat */
+try { const q = new URLSearchParams(location.search).get('api'); if (q && /^https:\/\/script\.google\.com\//.test(q)) { LS.set('sppd_api', q); history.replaceState(null, '', location.pathname); } } catch (e) {}
 
 async function api(action, payload = {}) {
   const url = apiUrl();
